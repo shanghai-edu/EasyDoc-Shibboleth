@@ -26,10 +26,10 @@ idP 有多种认证方式，这里主要介绍两种：用户名+密码的认证
 ```
 ShibUserPassAuth {
    edu.vt.middleware.ldap.jaas.LdapLoginModule required
-      ldapUrl="ldap://ldap.example.edu.cn:389"
+      ldapUrl="ldap://ldap.example.org:389"
       ssl="false"
       tls="false"
-      baseDn="ou=people,dc=example,dc=edu,dc=cn"
+      baseDn="ou=people,dc=example,dc=org"
       subtreeSearch="true"
       userFilter="uid={0}"
       bindDn="<ldapservicedn>"

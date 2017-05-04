@@ -8,9 +8,9 @@
 
 idp provider 修改。
 ```
-    <rp:AnonymousRelyingParty provider="https://idp.example.edu.cn/idp/shibboleth" defaultSigningCredentialRef="IdPCredential"/>
+    <rp:AnonymousRelyingParty provider="https://idp.example.org/idp/shibboleth" defaultSigningCredentialRef="IdPCredential"/>
 
-    <rp:DefaultRelyingParty provider="https://idp.example.edu.cn/idp/shibboleth" defaultSigningCredentialRef="IdPCredential">
+    <rp:DefaultRelyingParty provider="https://idp.example.org/idp/shibboleth" defaultSigningCredentialRef="IdPCredential">
 ```
 
 metadata provider 修改
