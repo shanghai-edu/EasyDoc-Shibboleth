@@ -32,9 +32,26 @@
 
 #### 登出
 使用此链接登出跨校认证
-https://sp.example.com/Shibboleth.sso/Logout
+https://sp.example.com/Shibboleth.sso/Logout?return=https://www.baidu.com
+
 注意这并不会消除 idp 上 session。因此如果一个用户之前使用某 idp 认证之后，在 sp 上登出联邦认证后，再此从这个 sp 上发起联邦认证时，如果他还是选择同一个 idp，不需要重新输入用户名和密码，将直接跳回至 sp。
-要支持 SLO 需要 idp3 以上的版本
+
+要支持 SLO 需要 idp2.4 以上的版本
+
+#### SLO
+首先确保 SP 的版本不低于 2.5，idp 的版本不低于 2.4 。如果 idp 是从低版本升级而来的话，则需要在升级时覆盖配置文件（提前备份相关配置内容），以增加 SLO 的相关配置支持。同时需要更新 ds 上的 idp metadata 内容，确保增加了 SLO 的标签
+```
+<SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://idp.example.cn/idp/profile/SAML2/Redirect/SLO"/>
+<SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://idp.example.cn/idp/profile/SAML2/POST/SLO"/>
+<SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://idp.example.cn/idp/profile/SAML2/SOAP/SLO"/>
+```
+如果出现``` Use of EncryptedID not supported in LogoutRequest ```的报错，那么修改 SP 上的配置，添加 ```encryption="false"```
+```
+    <ApplicationDefaults entityID="sptest"
+                         REMOTE_USER="eppn persistent-id targeted-id"
+                          encryption="false">
+```
+这是因为 idp2 的版本中，不支持在 logout 的消息中加密 ID。SP2.5 以下版本之类默认是 ```encryption="false``` ，SP2.6 则更改了根据对端版本自适应。如果出现错误，强制指定 ```encryption="false``` 即可
 
 #### Java Servlets
 shibboleth 没法直接支持 Java Servlets，但是可以通过 AJP 来间接支持。
@@ -58,7 +75,7 @@ https://wiki.shibboleth.net/confluence/display/SHIB2/NativeSPJavaInstall
 
 请求地址，作为应用发起跨校认证的入口
 
-https://sp.example.cn/test/?redirect_uri=http://www.163.com
+https://sp.example.org/test/?redirect_uri=http://www.163.com
 
 |参数|参数说明|
 -----|----|
@@ -66,8 +83,7 @@ https://sp.example.cn/test/?redirect_uri=http://www.163.com
 
 经过跨校认证
 
-返回到此接口后，重定向至 redirect_uri 并携带属性。
-http://www.163.com/?uid=MjAxNTAwNzM=&cn=5Yav6aqQ&domainName=ZWNudS5lZHUuY24=&msg=296c6e5ed46b016881c192315ab12215&date=1473829135
+返回到此接口后，重定向至 redirect_uri 并携带属性。 http://www.163.com/?uid=MjAxNTAwNzM=&cn=5Yav6aqQ&domainName=ZWNudS5lZHUuY24=&msg=296c6e5ed46b016881c192315ab12215&_time=1473829135
 
 |参数|参数说明|
 -----|----|
@@ -75,4 +91,14 @@ http://www.163.com/?uid=MjAxNTAwNzM=&cn=5Yav6aqQ&domainName=ZWNudS5lZHUuY24=&msg
 |cn|姓名，base64封装|
 |domainName|来源域，base64封装|
 |msg|校验码，通过字符串连接时间戳计算校验码，判断来源请求是否伪造|
-|date|时间戳，用于计算校验码，也可用于判断请求时间是否有效|
+|_time|时间戳，用于计算校验码，也可用于判断请求时间是否有效|
+
+msg 的参考计算方式
+
+```
+key = ak12032bs8123k123ks88  //双方协商好的密钥
+_time = 1473829135
+msg = md5(key+_time)
+    = md5(ak12032bs8123k123ks881473829135)
+    = 12818a94fc4ebbd72be2f1289087b2ee
+```

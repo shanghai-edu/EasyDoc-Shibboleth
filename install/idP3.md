@@ -2,11 +2,11 @@
 
 ## 环境需求
 
-- Oracle Jave或者OpenJDK 7或8，需下载对应的the Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files 文件。虽然JRE可能可以使用，但是本版本只支持JDK。
+- Oracle Jave 或者 OpenJDK 7 或 8，需下载对应的 the Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files 文件。虽然 JRE 可能可以使用，但是技术团队只支持JDK。
 - 需要支持Servlet API 3.0 的Servlet容器
 	- Tomcat7+
 	- Jetty8+
-- 正式支持的版本 Tomcat 8.x和Jetty 9.2.x，尽管上文有提及Tomcat7等老版本，但并没有对以上版本进行测试，也未在案例中提及。
+- 正式支持的版本 Tomcat 8.x和Jetty 9.2.x，尽管上文有提及 Tomcat7 等老版本，但并没有对以上版本进行测试，可能有 Bug。
 - 由于核心技术团队是以Jetty平台进行开发测试的，因此官方推荐使用Jetty 9 容器，笔者个人依然倾向于使用更为熟悉的 Tomcat8。
 - 无操作系统限制，但推荐使用Linux, OS X 和 Windows。
 
@@ -27,8 +27,7 @@ idP V3.0不支持以下Idp的老版本配置：
 
 #### 准备工作
 - 一张 SSL 证书以开启 idP 的 https 访问
-- 用于表示你 idP 的 entityID，安装程序默认会使用你的 hostname。
-- 你的 DNS 子域，用于追加生成 "scope" 属性，比如根据你的用户名自动生成邮件地址（在用户名后追加@xxx.edu.cn，说老实话我觉得这没什么卵用）
+- 用于表示你 idP 的 entityID，安装程序默认会使用你的 hostname）
 - 一个 metadata 的获取源，用于和互信的 sp 进行通讯。通常你可以向联盟的管理方去咨询这个，或者你也可以手动创建自己的 metadata。
 
 如果没有 metadata 的话，你可以在 [Testshib](http://www.testshib.org/) 上测试你的 idP。
@@ -42,9 +41,21 @@ idP V3.0不支持以下Idp的老版本配置：
 - idP 自己加密 cookies 和其他数据的 密钥和密钥版本文件。（这是 java keystore 的格式 "JCEKS")
 - 基于这些信息产生的 idP 的默认配置
 
+安装好 tomcat8 并做好 java 环境
+```
+cat /etc/profile
+JAVA_HOME=/usr/java/jdk1.8.0_131
+TOMCAT_HOME=/opt/apache-tomcat-8.0.43
+PATH=$JAVA_HOME/bin:$PATH
+CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+export JAVA_HOME
+export TOMCAT_HOME
+export PATH
+export CLASSPATH
+```
 #### linux 下安装
 
-Shibboleth idp 是一个标准的 Java web application，基于 Servlet 3.0 规范。你可以在所有兼容此规范的 Servlet 容器上运行 idP 。官方支持的版本是 Tomcat 和 Jetty，官方建议使用 Jetty，而我更喜欢 Tomcat。
+Shibboleth idp 是一个标准的 Java web application，基于 Servlet 3.0 规范。你可以在所有兼容此规范的 Servlet 容器上运行 idP 。官方支持的版本是 Tomcat 和 Jetty，这里使用 Tomcat 为例。
 
 1. 下载 [idP](http://shibboleth.net/downloads/identity-provider/latest) 最新的版本
 2. 解压你下载的文件，例如 : 
@@ -79,21 +90,33 @@ opt/shibboleth-idp# bin/build.sh
 <Context docBase="idp.home/war/idp.war"
          privileged="true"
          antiResourceLocking="false"
-         swallowOutput="true" />
+         swallowOutput="true">
+ 
+    <!-- Work around lack of Max-Age support in IE/Edge -->
+    <CookieProcessor alwaysAddExpires="true" />
+ 
+</Context>
 ```
 - Tomcat 默认监听 8080 和 8443 端口。一般我们需要把他改成 80 和 443，你可以在```TOMCAT_HOME/conf/server.xml```修改这个。本文示例中，我们将用 apache 来代理 Tomcat，所以不去管它。
-- 添加以下参数到 CATALINA_OPTS 的环境变量。在 Linux 下，可以在 Tomcat 的 bin/ 目录下创建 setenv.sh 来自动添加环境变量。
+- - Tomcat 默认没有提供 Java Server Tag Library，这使得 idP3 的 status 页面无法显示。解决的办法是下载 [jstl的jar包](https://build.shibboleth.net/nexus/service/local/repositories/thirdparty/content/javax/servlet/jstl/1.2/jstl-1.2.jar)，然后放在 idp.home/edit-webapp/WEB-INF/lib/ 内，然后需要重新 Build 一下 idp。在 idp.home 的目录下，```./bin/build.sh``` 即可
+- 添加以下参数到 CATALINA_OPTS 的环境变量。
 	- ```-Didp.home=<location> ``` <location> 替换为你实际的路径
-	-  ```-Xmx512m``` 这里配置了你 Tomcat 所允许使用的最大内存，建议至少 512M
-	-  ```-XX:MaxPermSize=128m``` JVM最大允许分配的非堆内存，按需分配
 	- v3.12以后的版本中，idp.home 也可以通过 web.xml 来指定。在 edit-webapp 目录下创建web.xml，然后重新 build idp.war（未测试）
-```xml		
-<context-param>
-    <param-name>idp.home</param-name>
-    <param-value>/opt/idp</param-value>
-</context-param>
+	```xml		
+	<context-param>
+	    <param-name>idp.home</param-name>
+	    <param-value>/opt/idp</param-value>
+	</context-param>
+	```
+	-  ```-XX:+UseG1GC``` 开启垃圾回收器，以在 metadata 比较大的时候获得好一点的性能
+	-  ```-Xmx1500m``` JVM 的最大内存，如果联盟的 metadata 很大（超过 25M) 那么至少需要 1.5G 的内存。最好根据实际情况测试一下
+	-  ```-XX:MaxPermSize=128m``` JVM最大允许分配的非堆内存，按需分配
+
 ```
-- Tomcat 默认没有提供 Java Server Tag Library，这使得 idP3 的 status 页面无法显示。解决的办法是下载 [jstl的jar包](https://build.shibboleth.net/nexus/service/local/repositories/thirdparty/content/javax/servlet/jstl/1.2/jstl-1.2.jar)，然后放在 TOMCAT_HOME/lib 内，重启 Tomcat 即可。
+CATALINA_OPTS="-server -Didp.home=/opt/idp -XX:+UseG1GC -Xmx1500m -XX:MaxPermSize=128m"
+export CATALINA_OPTS
+```
+
 
 ##### 建议的配置调整
 - 限制 Post 表单的大小。在 Tomact 的 Connector 中（AJP 的或者 http 的）配置 maxPostSize参数。100K(100000)是一个相对比较合理的数值。
@@ -113,7 +136,7 @@ request.tomcatAuthentication="false" address="127.0.0.1"
 
 配置 apache 的 ajp 反向代理
 修改 httpd.conf
-```ProxyPass /idp/ ajp://localhost:8009/idp```
+```ProxyPass /idp/ ajp://localhost:8009/idp/```
 
 #### 部署 ssl 证书
 
@@ -124,10 +147,53 @@ request.tomcatAuthentication="false" address="127.0.0.1"
 
 #### idP 状态的查看
 
-访问 https://idp.exmaple.edu.cn/idp/status
-查看 idP 状态信息，主要需要在 Tomcat 中增加 jstl 的jar包
+```idp.home/bin/status.sh```
+```
+### Operating Environment Information
+operating_system: Linux
+operating_system_version: 2.6.32-696.el6.x86_64
+operating_system_architecture: amd64
+jdk_version: 1.8.0_131
+available_cores: 2
+used_memory: 749 MB
+maximum_memory: 1500 MB
 
-默认之允许本机访问，可修改 ```idp.home/conf/access-control.xml``` 来增加允许访问的地址。 
+### Identity Provider Information
+idp_version: 3.3.1
+start_time: 2017-05-04T00:23:39+08:00
+current_time: 2017-05-04T00:24:01+08:00
+uptime: 21304 ms
+
+service: shibboleth.LoggingService
+last successful reload attempt: 2017-05-03T16:22:09Z
+last reload attempt: 2017-05-03T16:22:09Z
+
+service: shibboleth.ReloadableAccessControlService
+last successful reload attempt: 2017-05-03T16:22:16Z
+last reload attempt: 2017-05-03T16:22:16Z
+
+service: shibboleth.MetadataResolverService
+last successful reload attempt: 2017-05-03T16:22:16Z
+last reload attempt: 2017-05-03T16:22:16Z
+
+service: shibboleth.RelyingPartyResolverService
+last successful reload attempt: 2017-05-03T16:22:14Z
+last reload attempt: 2017-05-03T16:22:14Z
+
+service: shibboleth.NameIdentifierGenerationService
+last successful reload attempt: 2017-05-03T16:22:14Z
+last reload attempt: 2017-05-03T16:22:14Z
+
+service: shibboleth.AttributeResolverService
+last successful reload attempt: 2017-05-03T16:22:14Z
+last reload attempt: 2017-05-03T16:22:14Z
+
+        DataConnector staticAttributes: has never failed
+
+service: shibboleth.AttributeFilterService
+last successful reload attempt: 2017-05-03T16:22:14Z
+last reload attempt: 2017-05-03T16:22:14Z
+```
 
 #### 时间同步
 
