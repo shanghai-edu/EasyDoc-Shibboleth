@@ -21,7 +21,7 @@ gpgkey=http://mirrors.ecnu.edu.cn/repositories/security:/shibboleth/CentOS_CentO
 enabled=1
 ```
 #### yum 安装
-``yum install shibboleth-embedded-ds```
+```yum install shibboleth-embedded-ds```
 
 #### 安装目录
 
