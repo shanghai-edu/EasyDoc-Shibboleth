@@ -8,26 +8,36 @@ idP 能够在认证时去读取用户的身份属性信息，从而提供给应�
 
 ```
     <resolver:AttributeDefinition xsi:type="ad:Simple" id="uid" sourceAttributeID="uid">
-        <resolver:Dependency ref="generic" />
+        <resolver:Dependency ref="myLDAP" />
         <resolver:AttributeEncoder xsi:type="enc:SAML1String" name="urn:mace:dir:attribute-def:uid" />
        <resolver:AttributeEncoder xsi:type="enc:SAML2String" name="urn:oid:2.5.4.2" friendlyName="uid" />
-
+	</resolver:AttributeDefinition>
+    <resolver:AttributeDefinition xsi:type="ad:Simple" id="cn" sourceAttributeID="cn">
+        <resolver:Dependency ref="myLDAP" />
+        <resolver:AttributeEncoder xsi:type="enc:SAML1String" name="urn:mace:dir:attribute-def:cn" />
+        <resolver:AttributeEncoder xsi:type="enc:SAML2String" name="urn:oid:2.5.4.3" friendlyName="cn" />
+    </resolver:AttributeDefinition>
     <resolver:AttributeDefinition xsi:type="ad:Simple" id="email" sourceAttributeID="mail">
-        <resolver:Dependency ref="generic" />
+        <resolver:Dependency ref="myLDAP" />
         <resolver:AttributeEncoder xsi:type="enc:SAML1String" name="urn:mace:dir:attribute-def:email" />
         <resolver:AttributeEncoder xsi:type="enc:SAML2String" name="urn:oid:0.9.2342.19200300.100.1.3" friendlyName="email" />
+    </resolver:AttributeDefinition>
+    <resolver:AttributeDefinition xsi:type="ad:Simple" id="domainName" sourceAttributeID="domainName">
+        <resolver:Dependency ref="staticAttributes" />
+        <resolver:AttributeEncoder xsi:type="enc:SAML1String" name="urn:mace:dir:attribute-def:domainName" />
+        <resolver:AttributeEncoder xsi:type="enc:SAML2String" name="urn:oid:2.5.4.5" friendlyName="domainName" />
     </resolver:AttributeDefinition>
 ```
 
 这里的xsi:type="enc:SAML2String" name="urn:oid:2.5.4.2"，需要遵循联盟内的属性标准，可与联盟的管理单位联系确认。
 
 ##### 采用 ldap 获取属性
-修改属性连接器配置，此处为 ```generic``` ,t添加 ldap 相关配置信息。如果 ldap 查询响应过慢会导致认证出错，则应增加 ```searchTimeLimit="30000"``` 限制查询时间，保障至少认证通过。
+修改属性连接器配置，此处为 ```myLDAP``` ,t添加 ldap 相关配置信息。如果 ldap 查询响应过慢会导致认证出错，则应增加 ```searchTimeLimit="30000"``` 限制查询时间，保障至少认证通过。
 示例
 ```
-    <resolver:DataConnector id="generic" xsi:type="dc:LDAPDirectory"
-        ldapURL="ldap://ldap.example.edu.cn:389" 
-        baseDN="dc=example,dc=edu,dc=cn" 
+    <resolver:DataConnector id="myLDAP" xsi:type="dc:LDAPDirectory"
+        ldapURL="ldap://ldap.example.org:389" 
+        baseDN="dc=example,dc=org" 
         principal="<ldapservicedn>"
         principalCredential="<password>"
         searchTimeLimit="30000">
@@ -36,9 +46,19 @@ idP 能够在认证时去读取用户的身份属性信息，从而提供给应�
                 (uid=$requestContext.principalName)
             ]]>
         </dc:FilterTemplate>
-        <dc:ReturnAttributes>uid cn mail membleOf</dc:ReturnAttributes>
+        <dc:ReturnAttributes>uid cn mail</dc:ReturnAttributes>
     </resolver:DataConnector>
 
+```
+#### 采用 静态连接器 获取属性
+有些属性信息是全局的，比如某个 idp 中用户的所属来源域(domainName)。此时可以给他赋予静态的属性
+
+```
+        <resolver:DataConnector id="staticAttributes" xsi:type="dc:Static">
+                <dc:Attribute id="domainName">
+                        <dc:Value>ecnu.edu.cn</dc:Value>
+                </dc:Attribute>
+        </resolver:DataConnector>
 ```
 
 ##### 采用 jbdc 的方式获取属性

@@ -27,12 +27,6 @@ Shibboleth 强调隐私的保护，因此对于 idP 所释放的属性，可以�
         <afp:AttributeRule attributeID="domainName">
                 <afp:PermitValueRule xsi:type="basic:ANY"/>
         </afp:AttributeRule>
-        <afp:AttributeRule attributeID="inetUserStatus">
-                <afp:PermitValueRule xsi:type="basic:ANY"/>
-        </afp:AttributeRule>
-        <afp:AttributeRule attributeID="typeOf">
-                <afp:PermitValueRule xsi:type="basic:ANY"/>
-        </afp:AttributeRule>
     </afp:AttributeFilterPolicy>
 ```
 
