@@ -27,14 +27,14 @@ Shibboleth idp V2 的版本是一个标准的 Java web application，基于 Serv
 
 官方支持的容器版本是 Jetty7+ 和 Tomcat6+ 的版本。本文将以 Tomcat 为例，关于容器本身的一些文档，可以在对应的官网去查。
 
-1. 下载 [idP](http://shibboleth.net/downloads/identity-provider/2.4.4/) 
+1. 下载 [idP](http://shibboleth.net/downloads/identity-provider/2.4.5/) 
 2. 解压你下载的文件，例如 : 
 	```
-	unzip shibboleth-identityprovider-2.4.4-bin.zip
+	unzip shibboleth-identityprovider-2.4.5-bin.zip
 	```
 3. 进入解压的目录，例如：
 	```
-	cd shibboleth-identityprovider-2.4.4
+	cd shibboleth-identityprovider-2.4.5
 	```
 4. 运行 ```./install.sh``` (linux) 或者 ```./install.bat``` (windows)
 	- idP 的安装目录，本文中以 IDP_HOME 代替
@@ -80,7 +80,7 @@ request.tomcatAuthentication="false" address="127.0.0.1"
 
 配置 apache 的 ajp 反向代理
 修改 httpd.conf
-```ProxyPass /idp/ ajp://localhost:8009/idp```
+```ProxyPass /idp/ ajp://localhost:8009/idp/```
 
 #### 部署 ssl 证书
 
@@ -91,10 +91,10 @@ request.tomcatAuthentication="false" address="127.0.0.1"
 
 #### idP 状态的查看
 
-可以访问这个地址 https://idp.example.edu.cn/idp/profile/Status
+可以访问这个地址 https://idp.example.org/idp/profile/Status
 如果 idP 服务正常，那么应该显示 ok
 
-也可以访问 https://idp.exmaple.edu.cn/idp/status
+也可以访问 https://idp.exmaple.org/idp/status
 可以查看更详细的 idP 状态信息
 
 后者默认只允许本机访问。可以修改 web.xml 来修改ACL。
