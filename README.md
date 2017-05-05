@@ -18,6 +18,6 @@ https://wiki.shibboleth.net/confluence/display/SHIB2/Home
 
 #### 参与
 
-这个文档使用 gitbook 撰写，内容是开源的。项目见 https://github.com/freedomkk-qfeng/EasyDoc-Shibboleth
+这个文档使用 gitbook 撰写，内容是开源的。项目见 https://github.com/shanghai-edu/EasyDoc-Shibboleth
 如果对文档有什么建议和需求，都可以在这个项目下提 issue，我们会根据需求不断完善文档。当然 PR 是永远欢迎的！
 
