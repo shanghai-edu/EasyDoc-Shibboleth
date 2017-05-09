@@ -16,7 +16,7 @@ idp provider 修改。
 metadata provider 修改
 ```
         <metadata:MetadataProvider id="URLMD" xsi:type="metadata:FileBackedHTTPMetadataProvider"
-                          metadataURL="https://ds.shec.edu.cn/metadata.xml"
+                          metadataURL="https://ds.example.org/metadata.xml"
                           backingFile="/opt/idp/metadata/allinone.xml">
         </metadata:MetadataProvider>
 ```

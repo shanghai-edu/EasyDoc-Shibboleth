@@ -56,7 +56,7 @@ idP 能够在认证时去读取用户的身份属性信息，从而提供给应�
 ```
         <resolver:DataConnector id="staticAttributes" xsi:type="dc:Static">
                 <dc:Attribute id="domainName">
-                        <dc:Value>ecnu.edu.cn</dc:Value>
+                        <dc:Value>example.org</dc:Value>
                 </dc:Attribute>
         </resolver:DataConnector>
 ```

@@ -27,6 +27,8 @@ SELINUXTYPE=targeted
 
 ### 安装
 #### 准备 repo
+官方 repo 地址是 http://download.opensuse.org/repositories/security://shibboleth 国内访问可能比较慢，可以选择华东师大的镜像
+
 在 http://mirrors.ecnu.edu.cn/repositories/security://shibboleth/ 下载添加 yum repo
 注意修改 repo 中的 地址
 ```
