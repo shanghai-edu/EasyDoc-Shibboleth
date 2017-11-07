@@ -98,7 +98,7 @@ msg 的参考计算方式, `python` 参考代码
 ```
 >>> import md5
 >>> import base64
->>> key = "ak12032bs8123k123ks88"
+>>> key = "ak12032bs8123k123ks88" # 事先协商好的密钥
 >>> _time = "1510037984"
 >>> uid = base64.b64decode("MjAxNTAwNzM=")
 >>> domainName = base64.b64decode("ZWNudS5lZHUuY24=")
