@@ -75,7 +75,7 @@ https://wiki.shibboleth.net/confluence/display/SHIB2/NativeSPJavaInstall
 
 请求地址，作为应用发起跨校认证的入口
 
-https://sp.example.org/test/?redirect_uri=http://www.163.com
+https://sp.example.org/test/?redirect_uri=https://www.baidu.com
 
 |参数|参数说明|
 -----|----|
@@ -83,22 +83,31 @@ https://sp.example.org/test/?redirect_uri=http://www.163.com
 
 经过跨校认证
 
-返回到此接口后，重定向至 redirect_uri 并携带属性。 http://www.163.com/?uid=MjAxNTAwNzM=&cn=5Yav6aqQ&domainName=ZWNudS5lZHUuY24=&msg=296c6e5ed46b016881c192315ab12215&_time=1473829135
+返回到此接口后，重定向至 redirect_uri 并携带属性。 https://www.baidu.com/?uid=MjAxNTAwNzM=&cn=5Yav6aqQ&domainName=ZWNudS5lZHUuY24=&msg=a97e0c9b8666e7abd957055096316a85&_time=1510037984
 
 |参数|参数说明|
 -----|----|
 |uid|用户名，base64封装|
 |cn|姓名，base64封装|
 |domainName|来源域，base64封装|
-|msg|校验码，通过字符串连接时间戳计算校验码，判断来源请求是否伪造|
+|msg|校验码，通过字符串连接计算校验码，判断来源请求是否伪造。校验码通过密钥，时间戳，用户名和来源域综合生成|
 |_time|时间戳，用于计算校验码，也可用于判断请求时间是否有效|
 
-msg 的参考计算方式
+msg 的参考计算方式, `python` 参考代码
 
 ```
-key = ak12032bs8123k123ks88  //双方协商好的密钥
-_time = 1473829135
-msg = md5(key+_time)
-    = md5(ak12032bs8123k123ks881473829135)
-    = 12818a94fc4ebbd72be2f1289087b2ee
+>>> import md5
+>>> import base64
+>>> key = "ak12032bs8123k123ks88"
+>>> _time = "1510037984"
+>>> uid = base64.b64decode("MjAxNTAwNzM=")
+>>> domainName = base64.b64decode("ZWNudS5lZHUuY24=")
+>>> msg = key + _time + uid + domainName
+>>> print msg
+ak12032bs8123k123ks88151003798420150073ecnu.edu.cn
+>>> m1 = md5.new()
+>>> m1.update()
+>>> m1.update(msg)
+>>> print m1.hexdigest()
+a97e0c9b8666e7abd957055096316a85
 ```
